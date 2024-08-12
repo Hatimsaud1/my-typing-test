@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار الكتابة السريعة</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>اختبار الكتابة السريعة</h1>
+        <div id="timer">1:00</div>
+        <div id="text">{{ test_text }}</div>
+        <textarea id="input" placeholder="ابدأ الكتابة هنا..."></textarea>
+        <button id="reset">إعادة</button>
+    </div>
+
+    <script>
+        let startTime;
+        let timerInterval;
+        let isRunning = false;
+
+        document.getElementById('input').addEventListener('input', function () {
+            if (!isRunning) {
+                startTime = new Date();
+                isRunning = true;
+                timerInterval = setInterval(updateTimer, 1000);
+            }
+        });
+
+        document.getElementById('input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                endTest();
+            }
+        });
+
+        document.getElementById('reset').addEventListener('click', function () {
+            resetTest();
+        });
+
+        function updateTimer() {
+            const elapsed = Math.floor((new Date() - startTime) / 1000);
+            const remaining = 60 - elapsed;
+            if (remaining <= 0) {
+                clearInterval(timerInterval);
+                endTest();
+            }
+            const minutes = Math.floor(remaining / 60);
+            const seconds = remaining % 60;
+            document.getElementById('timer').textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        }
+
+        function endTest() {
+            clearInterval(timerInterval);
+            const elapsedSeconds = (new Date() - startTime) / 1000;
+            const inputText = document.getElementById('input').value;
+            const userWordCount = inputText.split(/\s+/).length;
+            const accuracy = (inputText.split('').filter((char, index) => char === '{{ test_text }}'[index]).length / '{{ test_text }}'.length) * 100;
+            const speed = (userWordCount / elapsedSeconds) * 60;
+            alert(`الوقت المستغرق: ${elapsedSeconds.toFixed(2)} ثانية\nسرعة الكتابة: ${speed.toFixed(2)} كلمة في الدقيقة\nالدقة: ${accuracy.toFixed(2)}%`);
+            resetTest();
+        }
+
+        function resetTest() {
+            clearInterval(timerInterval);
+            isRunning = false;
+            document.getElementById('timer').textContent = "1:00";
+            document.getElementById('input').value = '';
+        }
+    </script>
+</body>
+</html>
